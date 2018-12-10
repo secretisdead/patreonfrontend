@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+{% block title %}Create client{% endblock %}
+{% block content %}
+	<h1>Create client</h1>
+	<nav>
+		<a href="{{ url_for('patreon_admin.clients_list') }}">Return</a>
+	</nav>
+	<p>Because Patreon currently doesn't support accessing other users' campaign information through a third party client, you must first <a href="https://www.patreon.com/platform/documentation/clients">create your own client on Patreon</a>, and then connect it by entering the information below.</p>
+	<p>If you have an existing client already created for other purposes, you should still create a new client to use solely for site Patreon integration.</p>
+	<p>You only need to create one of these clients per Patreon creator account, because this single client will retrieve all capaign information for that account.</p>
+	<p>This is currently set up for admins to manage everything, but it should be possible to modify this package to allow individual users in a multi-user instance to manage their own clients without seeing each others' clients if necessary.</p>
+	{% include 'patreon_client_form.html' %}
+{% endblock %}

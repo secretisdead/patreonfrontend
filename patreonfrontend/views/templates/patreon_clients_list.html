@@ -1,0 +1,189 @@
+{% extends 'layout.html' %}
+{% block title %}Patreon clients list{% endblock %}
+{% block content %}
+	<h1>Patreon clients list</h1>
+	<nav>
+		<a href="{{ url_for('patreon_admin.create_client') }}">Create client</a> 
+	</nav>
+	{% macro render_result(result) %}
+		<tr>
+			<td>
+				<a 
+					href="{{ url_for(
+						'patreon_admin.clients_list',
+						sort=pagination['sort'],
+						order=pagination['order'],
+						perpage=pagination['perpage'],
+						id=result.id,
+					) }}" 
+					title="View client in list">
+					○
+				</a>
+			</td>
+			<td data-timestamp="{{ result.creation_time }}">
+				{{ result.creation_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}
+			</td>
+			<td>
+				<a 
+					href="{{ url_for('patreon_admin.edit_client', client_id=result.id) }}" 
+					title="Edit this client">
+					{% if result.creation_name %}
+						{{ result.creation_name }}
+					{% else %}
+						None
+					{% endif %}
+				</a>
+			</td>
+			<td>
+				<a 
+					href="{{ url_for('patreon_admin.tiers_list', client_id=result.id) }}" 
+					title="View this client's tiers">
+					{{ result.tiers|length }}
+				</a>
+			</td>
+			<td>
+				<a 
+					href="{{ url_for('patreon_admin.benefits_list', client_id=result.id) }}" 
+					title="View this client's benefits">
+					{{ result.benefits|length }}
+				</a>
+			</td>
+			<td>
+				<a 
+					href="{{ url_for('patreon_admin.members_list', client_id=result.id) }}" 
+					title="View this client's members">
+					{{ result.total_members }}
+				</a>
+			</td>
+			{% if not result.access_token_expiration_time %}
+				<td></td>
+			{% else %}
+				<td data-timestamp="{{ result.access_token_expiration_time }}">
+					{{ result.access_token_expiration_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}
+				</td>
+			{% endif %}
+			<td>
+				<a 
+					href="{{ url_for(
+						'patreon_admin.refresh_client',
+						client_id=result.id,
+						redirect_uri=request.url,
+					) }}" 
+					title="Refresh data for this client">
+					Refresh
+				</a>
+			</td>
+			<td>
+				<a 
+					href="{{ url_for(
+						'patreon_admin.grant_client_permissions',
+						client_id=result.id,
+						redirect_uri=request.url,
+					) }}" 
+					title="Grant all owed permissions for this client">
+					Grant
+				</a>
+			</td>
+			<td>
+				<a 
+					href="{{ url_for(
+						'patreon_admin.remove_client',
+						client_id=result.id,
+						redirect_uri=request.url,
+					) }}" 
+					title="Remove this client">
+					Remove
+				</a>
+			</td>
+		</tr>
+	{% endmacro %}
+	{% set columns = [
+		{
+			'name': 'id',
+			'label': 'ID',
+			'sortable': False,
+			'searchable': True,
+			'type': 'text',
+		},
+		{
+			'name': 'creation_time',
+			'label': 'Created',
+			'sortable': True,
+			'searchable': True,
+			'type': 'amount',
+			'less_than_name': 'created_before',
+			'less_than_label': 'Created before',
+			'less_than_placeholder': 'Datetime string',
+			'greater_than_name': 'created_after',
+			'greater_than_label': 'Created after',
+			'greater_than_placeholder': 'Datetime string',
+		},
+		{
+			'name': 'creation_name',
+			'label': 'Creation name',
+			'sortable': True,
+			'searchable': True,
+			'type': 'text',
+		},
+		{
+			'name': 'tiers',
+			'label': 'Tiers',
+			'sortable': False,
+			'searchable': False,
+		},
+		{
+			'name': 'benefits',
+			'label': 'Benefits',
+			'sortable': False,
+			'searchable': False,
+		},
+		{
+			'name': 'members',
+			'label': 'Members',
+			'sortable': False,
+			'searchable': False,
+		},
+		{
+			'name': 'access_token_expiration_time',
+			'label': 'Expiration',
+			'sortable': True,
+			'searchable': True,
+			'type': 'amount',
+			'less_than_name': 'expired_before',
+			'less_than_label': 'Expired before',
+			'less_than_placeholder': 'Datetime string',
+			'greater_than_name': 'expired_after',
+			'greater_than_label': 'Expired after',
+			'greater_than_placeholder': 'Datetime string',
+		},
+		{
+			'name': 'refresh',
+			'label': 'Refresh',
+			'sortable': False,
+			'searchable': False,
+		},
+		{
+			'name': 'grant',
+			'label': 'Grant',
+			'sortable': False,
+			'searchable': False,
+		},
+		{
+			'name': 'remove',
+			'label': 'Remove',
+			'sortable': False,
+			'searchable': False,
+		},
+	] %}
+	{% from 'tabular_list.jinja' import tabular_list %}
+	{{ tabular_list(
+		columns,
+		'patreon_admin.clients_list',
+		results,
+		total_results,
+		render_result,
+		total_pages,
+		pagination,
+		search,
+	) }}
+{% endblock %}

@@ -1,0 +1,46 @@
+{% for error in errors %}
+	<p class="form_error">{{ error }}</p>
+{% endfor %}
+<form method="post">
+	<label for="client_id">Client ID</label>
+	<input 
+		id="client_id" 
+		name="client_id" 
+		type="text"
+		value="{{ client_id }}" 
+		maxlength="{{ g.patreon.client_id_length }}">
+	<br>
+	<label for="client_secret">Client secret</label>
+	<input 
+		id="client_secret" 
+		name="client_secret" 
+		type="text"
+		value="{{ client_secret }}" 
+		maxlength="{{ g.patreon.client_secret_length }}">
+	<br>
+	<label for="webhook_secret">Webhook secret</label>
+	<input 
+		id="webhook_secret" 
+		name="webhook_secret" 
+		type="text"
+		value="{{ webhook_secret }}" 
+		maxlength="{{ g.patreon.webhook_secret_length }}">
+	<br>
+	<label for="access_token">Access token</label>
+	<input 
+		id="access_token" 
+		name="access_token" 
+		type="text"
+		value="{{ access_token }}" 
+		maxlength="{{ g.patreon.access_token_length }}">
+	<br>
+	<label for="refresh_token">Refresh token</label>
+	<input 
+		id="refresh_token" 
+		name="refresh_token" 
+		type="text" 
+		value="{{ refresh_token }}" 
+		maxlength="{{ g.patreon.refresh_token_length }}">
+	<br>
+	<input type="submit" value="Save changes">
+</form>

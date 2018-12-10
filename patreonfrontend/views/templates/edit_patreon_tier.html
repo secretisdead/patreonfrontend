@@ -1,0 +1,47 @@
+{% extends 'layout.html' %}
+{% block title %}Edit tier permissions{% endblock %}
+{% block content %}
+	<h1>Edit tier permissions</h1>
+	<nav>
+		<a href="{{ url_for('patreon_admin.tiers_list', client_id=client.id) }}">Return</a>
+	</nav>
+	<h2>{{ client.creation_name }}</h2>
+	<h3>
+		{% if tier['title'] %}
+			{{ tier['title'] }}
+		{% else %}
+			No title
+		{% endif %}
+	</h3>
+	<form method="post">
+		{#TODO
+			this arrangement makes it difficult to re-populate each scoped permission and 
+			to see individual lengths and shareabilities
+			but with this arrangement they shouldn't be different anyway #}
+		<label for="length">Length</label>
+		<select 
+			id="length" 
+			name="length" 
+			type="text">
+			{% for length_value, display in {
+					86400: 'Day',
+					604800: 'Week',
+					2419200: 'Month (28 days)',
+					3110400: 'Month+ (36 days)',
+					31536000: 'Year',
+				}.items() %}
+				<option 
+					value="{{ length_value }}"{% if length_value == length %} selected{% endif %}>
+					{{ display }}
+				</option>
+			{% endfor %}
+		</select>
+		<br>
+		<input id="shareable" name="shareable" type="checkbox"{% if shareable %} checked{% endif %}>
+		<label for="shareable">Shareable</label>
+		<br>
+		{% from 'permissions.jinja' import permissions_grid %}
+		{{ permissions_grid(groups=groups, selected_groups=selected_groups) }}
+		<input type="submit" value="Save changes">
+	</form>
+{% endblock %}

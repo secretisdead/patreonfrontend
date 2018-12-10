@@ -1,0 +1,265 @@
+{% extends 'layout.html' %}
+{% block title %}Patreon members list{% endblock %}
+{% block content %}
+	<h1>Patreon members list</h1>
+	<nav>
+		<a href="{{ url_for('patreon_admin.clients_list') }}">Return</a> 
+	</nav>
+	{% from 'users.jinja' import edit_user_link %}
+	{% macro render_result(result) %}
+		{% set client = None %}
+		{% if result.client_id in clients %}
+			{% set client = clients.get(result.client_id) %}
+		{% endif %}
+		<tr>
+			<td>
+				<a 
+					href="{{ url_for(
+						'patreon_admin.members_list',
+						sort=pagination['sort'],
+						order=pagination['order'],
+						perpage=pagination['perpage'],
+						id=result.id,
+					) }}" 
+					title="View member in list">
+					○
+				</a>
+			</td>
+			<td>
+				<a 
+					href="{{ url_for(
+						'patreon_admin.members_list',
+						sort=pagination['sort'],
+						order=pagination['order'],
+						perpage=pagination['perpage'],
+						client_id=result.client_id,
+					) }}" 
+					title="Search members of this client">
+					(Search)
+				</a> 
+				<a 
+					href="{{ url_for('patreon_admin.edit_client', client_id=result.client_id) }}" 
+					title="Edit this client">
+					{{ result.client_id }}
+				</a>
+			</td>
+			<td>
+				<a 
+					href="{{ url_for(
+						'patreon_admin.members_list',
+						sort=pagination['sort'],
+						order=pagination['order'],
+						perpage=pagination['perpage'],
+						campaign_id=result.campaign_id,
+					) }}" 
+					title="Search members of this campaign">
+					{% if client %}
+						{{ client.creation_name }}
+					{% else %}
+						{{ result.campaign_id }}
+					{% endif %}
+				</a> 
+			</td>
+			<td>
+				<a 
+					href="{{ url_for(
+						'patreon_admin.members_list',
+						sort=pagination['sort'],
+						order=pagination['order'],
+						perpage=pagination['perpage'],
+						tier_id=result.tier_id,
+					) }}" 
+					title="Search members of this tier">
+					(Search)
+				</a> 
+				<a 
+					href="{{ url_for(
+						'patreon_admin.edit_tier',
+						client_id=result.client_id,
+						tier_id=result.tier_id,
+					) }}" 
+					title="Edit permissions for this tier">
+					{% if client and result.tier_id in client.tiers %}
+						{{ client.tiers[result.tier_id]['title'] }}
+					{% else %}
+						{{ result.tier_id }}
+					{% endif %}
+				</a>
+			</td>
+			<td>
+				{% if result.user_id in patron_ids_to_users %}
+					{{ edit_user_link(patron_ids_to_users[result.user_id]) }}
+				{% endif %}
+			</td>
+			<td>
+				<a 
+					href="https://www.patreon.com/user?u={{ result.user_id }}" 
+					title="View this patron's patreon profile">
+					{{ result.name }}
+				</a>
+			</td>
+			<td>{{ '${:,.2f}'.format(result.amount_cents / 100) }}</td>
+			{% if not result.last_fulfill_time %}
+				<td>Never</td>
+			{% else %}
+				<td data-timestamp="{{ result.last_fulfill_time }}">
+					{{ result.last_fulfill_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}
+				</td>
+			{% endif %}
+			{% if not result.last_charge_time %}
+				<td>Never</td>
+			{% else %}
+				<td data-timestamp="{{ result.last_charge_time }}">
+					{{ result.last_charge_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}
+				</td>
+			{% endif %}
+			<td>
+				<a 
+					href="{{ url_for(
+						'patreon_admin.members_list',
+						sort=pagination['sort'],
+						order=pagination['order'],
+						perpage=pagination['perpage'],
+						last_charge_status=result.last_charge_status,
+					) }}" 
+					title="Search members with this last charge status">
+					{{ result.last_charge_status }}
+				</a>
+			</td>
+			<td>{{ '${:,.2f}'.format(result.lifetime_support_cents / 100) }}</td>
+			<td data-timestamp="{{ result.pledge_relationship_start_time }}">
+				{{ result.pledge_relationship_start_datetime.strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}
+			</td>
+		</tr>
+	{% endmacro %}
+	{% set columns = [
+		{
+			'name': 'id',
+			'label': 'ID',
+			'sortable': False,
+			'searchable': True,
+			'type': 'text',
+		},
+		{
+			'name': 'client_id',
+			'label': 'Client',
+			'sortable': False,
+			'searchable': True,
+			'type': 'text',
+			'placeholder': 'Client ID',
+		},
+		{
+			'name': 'campaign_id',
+			'label': 'Campaign',
+			'sortable': False,
+			'searchable': True,
+			'type': 'text',
+			'placeholder': 'Campaign ID',
+		},
+		{
+			'name': 'tier_id',
+			'label': 'Tier',
+			'sortable': False,
+			'searchable': True,
+			'type': 'text',
+			'placeholder': 'Tier ID',
+		},
+		{
+			'name': 'user',
+			'label': 'User',
+			'sortable': False,
+			'searchable': False,
+		},
+		{
+			'name': 'name',
+			'label': 'Patron name',
+			'sortable': True,
+			'searchable': True,
+			'type': 'text',
+		},
+		{
+			'name': 'amount_cents',
+			'label': 'Amount',
+			'sortable': True,
+			'searchable': True,
+			'type': 'amount',
+			'less_than_name': 'amount_cents_less_than',
+			'less_than_label': 'Amount less than',
+			'greater_than_name': 'amount_cents_more_than',
+			'greater_than_label': 'Amount more than',
+		},
+		{
+			'name': 'last_fulfill_time',
+			'label': 'Last fulfilled',
+			'sortable': True,
+			'searchable': True,
+			'type': 'amount',
+			'less_than_name': 'last_fulfilled_before',
+			'less_than_label': 'Last fulfilled before',
+			'less_than_placeholder': 'Datetime string',
+			'greater_than_name': 'last_fulfilled_after',
+			'greater_than_label': 'Last fulfilled after',
+			'greater_than_placeholder': 'Datetime string',
+		},
+		{
+			'name': 'last_charge_time',
+			'label': 'Last charged',
+			'sortable': True,
+			'searchable': True,
+			'type': 'amount',
+			'less_than_name': 'last_charged_before',
+			'less_than_label': 'Last charged before',
+			'less_than_placeholder': 'Datetime string',
+			'greater_than_name': 'last_charged_after',
+			'greater_than_label': 'Last charged after',
+			'greater_than_placeholder': 'Datetime string',
+		},
+		{
+			'name': 'last_charge_status',
+			'label': 'Last charge status',
+			'sortable': False,
+			'searchable': True,
+			'type': 'select',
+			'options': {
+				'': '',
+				'Paid': 'Paid',
+				'None': 'None',
+			},
+		},
+		{
+			'name': 'lifetime_support_cents',
+			'label': 'Lifetime amount',
+			'sortable': True,
+			'searchable': True,
+			'type': 'amount',
+			'less_than_name': 'lifetime_support_cents_less_than',
+			'less_than_label': 'Lifetime amount less than',
+			'greater_than_name': 'lifetime_support_cents_more_than',
+			'greater_than_label': 'Lifetime amount more than',
+		},
+		{
+			'name': 'pledge_relationship_start_time',
+			'label': 'Pledged since',
+			'sortable': True,
+			'searchable': True,
+			'type': 'amount',
+			'less_than_name': 'pledged_before',
+			'less_than_label': 'Pledged before',
+			'less_than_placeholder': 'Datetime string',
+			'greater_than_name': 'pledged_after',
+			'greater_than_label': 'Pledged after',
+			'greater_than_placeholder': 'Datetime string',
+		},
+	] %}
+	{% from 'tabular_list.jinja' import tabular_list %}
+	{{ tabular_list(
+		columns,
+		'patreon_admin.members_list',
+		results,
+		total_results,
+		render_result,
+		total_pages,
+		pagination,
+		search,
+	) }}
+{% endblock %}

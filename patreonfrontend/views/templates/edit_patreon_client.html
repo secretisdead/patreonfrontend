@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% block title %}Edit client{% endblock %}
+{% block content %}
+	<h1>Edit client</h1>
+	<nav>
+		<a href="{{ url_for('patreon_admin.clients_list') }}">Return</a>
+	</nav>
+	{% include 'patreon_client_form.html' %}
+{% endblock %}

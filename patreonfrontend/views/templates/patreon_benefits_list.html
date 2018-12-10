@@ -1,0 +1,47 @@
+{% extends 'layout.html' %}
+{% block title %}Patreon campaign benefits{% endblock %}
+{% block content %}
+	<h1>Patreon campaign benefits</h1>
+	<nav>
+		<a href="{{ url_for('patreon_admin.clients_list') }}">Return</a> 
+	</nav>
+	<h2>{{ client.creation_name }}</h2>
+	<table>
+		<thead>
+			<tr>
+				<td>Title</td>
+				<td>Type</td>
+				<td>Next deliverable</td>
+				{#TODO group name columns? #}
+			</tr>
+		</thead>
+		<tbody>
+			{% for benefit in client.benefits.values() %}
+				<tr>
+					<td>
+						{% if benefit['title'] %}
+							{{ benefit['title'] }}
+						{% else %}
+							No title
+						{% endif %}
+					</td>
+					<td>
+						{% if 'eom_monthly' == benefit['rule_type'] %}
+							Monthly
+						{% elif 'one_time_immediate' == benefit['rule_type'] %}
+							One time
+						{% endif %}
+					</td>
+					{% if not benefit['next_deliverable_due_time'] %}
+						<td>Never</td>
+					{% else %}
+						<td data-timestamp="{{ benefit['next_deliverable_due_time'] }}">
+							{{ benefit['next_deliverable_due_datetime'].strftime('%Y-%m-%dT%H:%M:%S.%f%z') }}
+						</td>
+					{% endif %}
+					{#TODO group name columns? #}
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}

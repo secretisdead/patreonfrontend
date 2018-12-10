@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% block title %}Patreon campaign tiers{% endblock %}
+{% block content %}
+	<h1>Patreon campaign tiers</h1>
+	<nav>
+		<a href="{{ url_for('patreon_admin.clients_list') }}">Return</a> 
+	</nav>
+	<h2>{{ client.creation_name }}</h2>
+	<table>
+		<thead>
+			<tr>
+				<td>Title</td>
+				<td>Amount</td>
+			</tr>
+		</thead>
+		<tbody>
+			{% for tier in client.tiers.values() %}
+				<tr>
+					<td>
+						<a 
+							href="{{ url_for(
+								'patreon_admin.edit_tier',
+								client_id=client.id, tier_id=tier['id']) }}" 
+							title="Edit tier permissions">
+							{% if tier['title'] %}
+								{{ tier['title'] }}
+							{% else %}
+								No title
+							{% endif %}
+						</a>
+					</td>
+					<td>{{ '${:,.2f}'.format(tier['amount_cents'] / 100) }}</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+{% endblock %}
