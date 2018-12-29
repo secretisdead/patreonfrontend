@@ -2,8 +2,7 @@ from functools import wraps
 import time
 import hashlib
 
-from flask import g, make_response, render_template
-from flask import request, abort
+from flask import g, request, abort, make_response
 
 from .. import PatreonFrontend
 
